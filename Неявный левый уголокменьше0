@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from celluloid import Camera
+
+T_div = 0.01
+X_div = 0.01
+a = 1.5
+sigma = a*T_div/X_div
+epsilon = 10**-7
+T = np.arange(0,1+T_div,T_div)
+X = np.arange(0,1+X_div,X_div)
+
+U1 = 1
+U0 = 0
+
+Y_C1 = np.ones((len(T),len(X)))* U0
+Y_C1[:][-1] = -U1
+
+fig = plt.figure()
+camera = Camera(fig)
+for n in range(len(T)-1):
+    Y_C1[n][0] = -U1
+
+    for m in range(len(X)-1,0,-1):
+        #Y_C1[n+1][m-1] = ((1-(sigma))*Y_C1[n+1][m] - Y_C1[n][m])/(sigma)
+        #Y_C1[n][m] = (1+sigma)*Y_C1[n+1][m] - Y_C1[n+1][m-1]*(sigma)
+        #Y_C1[m-1][n+1] = ((1+sigma) * Y_C1[m][n+1] - Y_C1[m][n]) / sigma
+       
+
+    plt.plot(X,Y_C1[n],color = 'black',linestyle = '',marker = 'o',label = 'НЛУ a<0')
+    camera.snap()
+animation = camera.animate()
+plt.show()
+
+#график прилег

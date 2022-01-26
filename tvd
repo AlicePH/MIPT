@@ -1,0 +1,39 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from celluloid import Camera
+
+T_div = 0.01
+X_div = 0.01
+a = 1.0
+sigma = a*T_div/X_div
+epsilon = 10**-7
+T = np.arange(0,1+T_div,T_div)
+X = np.arange(0,1+X_div,X_div)
+
+U1 = 1
+U0 = 0
+
+TVD = np.ones((len(T),len(X)))       * U0
+TVD[:][0] = -U1
+
+fig = plt.figure()
+camera = Camera(fig)
+for n in range(len(T)-1):
+    TVD[n][len(X)-1] = -U1
+
+    for m in range(1,len(X)-1):
+        rm = (TVD[n][m] - TVD[n][m-1] + epsilon)/(TVD[n][m+1] - TVD[n][m] + epsilon)
+        phi = 0
+        if (rm > 1):
+            phi = min(2,rm)
+        elif(rm > 0):
+            phi = min(2*rm,1)
+        y_plus = 0.5 * phi * sigma * (1 - sigma) * (TVD[n][m+1] - TVD[n][m])
+        y_minus = 0.5 * phi * sigma * (1 - sigma) * (TVD[n][m] - TVD[n][m-1])
+        TVD[n + 1][m] = TVD[n][m] - sigma * (TVD[n][m] - TVD[n][m - 1]) - (y_plus - y_minus)
+
+    plt.plot(X,TVD[n],color = 'black',linestyle = '',marker = 'o',label = 'TVD')
+    camera.snap()
+animation = camera.animate()
+plt.show()
+

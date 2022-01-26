@@ -1,0 +1,51 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from celluloid import Camera
+
+T_div = 0.005
+X_div = 0.01
+a = 1.0
+sigma = a*T_div/X_div
+T = np.arange(0,1+T_div,T_div)
+X = np.arange(0,1+X_div,X_div)
+
+q = 0.25
+
+U1 = 1
+U0 = 0
+
+Y_LV = np.ones((len(T),len(X)))* U0
+Y_LV[:][0] = -U1
+
+Y_LVM = np.ones((len(T),len(X)))* U0
+Y_LVM[:][0] = -U1
+
+fig = plt.figure()
+camera = Camera(fig)
+for n in range(len(T)-1):
+    Y_LVM[n][len(X)-1] = -U1
+    Y_LVM[n][len(X)-2] = -U1
+
+    for m in range(1,len(X)-1):
+        y_plus = 0.5 * sigma * (1 - sigma) * (Y_LVM[n][m + 1] - Y_LVM[n][m])
+        y_minus = 0.5 * sigma * (1 - sigma) * (Y_LVM[n][m] - Y_LVM[n][m-1])
+        Y_LVM[n+1][m] = Y_LVM[n][m] - sigma * (Y_LVM[n][m] - Y_LVM[n][m-1]) - (y_plus - y_minus)
+
+    for m in range(2,len(X)-2):
+        DPP = Y_LVM[n+1][m+2] - Y_LVM[n+1][m+1]
+        DP = Y_LVM[n+1][m+1] - Y_LVM[n+1][m]
+        DM = Y_LVM[n+1][m] - Y_LVM[n+1][m-1]
+        DMM = Y_LVM[n+1][m-1] - Y_LVM[n+1][m-2]
+
+        Q_plus = 0; Q_minus = 0
+        if(DPP*DP < 0 or DP*DM < 0):
+            Q_plus = DP
+        if (DMM * DM < 0 or DM * DP < 0):
+            Q_minus = DM
+
+        Y_LVM[n + 1][m] = Y_LVM[n+1][m] + q * (Q_plus - Q_minus)
+        
+    plt.plot(X,Y_LVM[n],color = 'black',linestyle = '',marker = 'o', label = 'Лакс-Вендроф с монотонизацией')
+    camera.snap()
+animation = camera.animate()
+plt.show()

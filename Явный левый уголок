@@ -1,0 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from celluloid import Camera
+
+T_div = 0.005
+X_div = 0.01
+a = 1.0
+sigma = a*T_div/X_div
+T = np.arange(0,1+T_div,T_div)
+X = np.arange(0,1+X_div,X_div)
+
+q = 0.25
+
+U1 = 1
+U0 = 0
+
+Y_LeftCorner = np.ones((len(T),len(X))) * U0
+Y_LeftCorner[:][0] = -U1
+
+fig = plt.figure()
+camera = Camera(fig)
+for n in range(len(T)-1):
+    Y_LeftCorner[n][len(X)-1] = -U1
+    
+    for m in range(1,len(X)):
+        Y_LeftCorner[n+1][m] = Y_LeftCorner[n][m] - sigma * (Y_LeftCorner[n][m] - Y_LeftCorner[n][m-1])
+    
+    plt.plot(X,Y_LeftCorner[n],color = 'black',linestyle = '',marker = 'o', label = 'ЯЛУ')
+   
+    camera.snap()
+animation = camera.animate()
+plt.show()

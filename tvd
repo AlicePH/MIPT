@@ -13,7 +13,7 @@ X = np.arange(0,1+X_div,X_div)
 U1 = 1
 U0 = 0
 
-TVD = np.ones((len(T),len(X)))       * U0
+TVD = np.ones((len(T),len(X))) * U0
 TVD[:][0] = -U1
 
 fig = plt.figure()
